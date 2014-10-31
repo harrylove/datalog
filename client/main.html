@@ -3,12 +3,76 @@
 </head>
 
 <body>
-  <h1>Welcome to Meteor!</h1>
-
-  {{> hello}}
+  <div class="container">
+    {{> loginButtons align="right" }}
+    {{> app }}
+    </div>
 </body>
 
-<template name="hello">
-  <button>Click Me</button>
-  <p>You've pressed the button {{counter}} times.</p>
+<template name="app">
+  <div class="row">
+    <div class="col-md-12">
+      {{> list_things }}
+    </div>
+  </div>
+  <div class="row">
+    <div class="col-md-6">
+      {{> new_thingfield }}
+    </div>
+    <div class="col-md-6">
+      {{> list_thingfields }}
+    </div>
+  </div>
+</template>
+
+<template name="list_things">
+  <h1>Things</h1>
+  <table class="table table-responsive table-condensed table-striped">
+    <thead>
+      <tr>
+	{{#each thingfields }}
+	<th>{{ label }}</th>
+	{{/each}}
+      </tr>
+    </thead>
+    <tbody>
+      {{#each things }}
+      <tr>
+	{{#each thingfields }}
+	<td>{{ thingValue }}</td>
+	{{/each}}
+      </tr>
+      {{/each}}
+    </tbody>
+  </table>
+</template>
+
+<template name="new_thingfield">
+  <h1>Add New Thingfield</h1>
+  <form rel="form" class="form">
+  <div class="form-group">
+    <label for="label">Label</label>
+    <input id="label" type="text" class="form-control">
+  </div>
+  <div class="form-group">
+    <label for="data_type">Data Type</label>
+    <select id="data_type" class="form-control">
+      {{#each validFieldTypes }}
+      <option>{{ this }}</option>
+      {{/each}}
+    </select>
+  </div>
+  <div class="form-group">
+    <input type="submit" class="btn" value="Save">
+  </div>
+  </form>
+</template>
+
+<template name="list_thingfields">
+  <h3>Thingfields</h3>
+  <ol>
+  {{#each thingfields }}
+  <li><b>{{ label }}</b> <small class="text-muted">{{ dtype }}</small></li>
+  {{/each}}
+  </ol>
 </template>
