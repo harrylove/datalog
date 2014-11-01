@@ -54,6 +54,14 @@ validFieldTypes = [
 ];
 
 Meteor.methods({
+    newThing: function(thing) {
+	// TODO
+	// go through each thingfields data type
+	// and check to make sure input matches type
+	
+	thing.user_id = Meteor.userId();
+	Things.insert(thing);
+    },
     newThingfield: function(tf) {
         check(tf.label, String);
         check(tf.dtype, String);

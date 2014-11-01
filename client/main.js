@@ -1,15 +1,34 @@
 Meteor.subscribe('things');
 Meteor.subscribe('thingfields');
 
-Template.list_things.helpers({
+Template.new_thing.helpers({
     thingfields: function() {
-	return Thingfields.find({}, { $sort: { form_order: 1 }});
+        return Thingfields.find({}, { sort: { form_order: 1 }});
+    }
+});
+
+Template.list_things_table.helpers({
+    thingfields: function() {
+        return Thingfields.find({}, { sort: { form_order: 1 }});
     },
     things: function() {
-	return Things.find();
+	// set Session of table order for sorting purposes
+	return Things.find({}, { sort: { Date: -1 }});
     },
     thingValue: function() {
 	return Template.parentData(1)[Template.parentData().label];
+    }
+});
+
+Template.new_thing.events({
+    'submit form': function(e, tmpl) {
+        e.preventDefault();
+	var thing = {};
+	_.each(tmpl.findAll('input[type!=submit]'), function(input) {
+	    thing[input.id] = input.value;
+	});
+        Meteor.call('newThing', thing);
+        tmpl.find('form').reset();
     }
 });
 
@@ -19,23 +38,22 @@ Template.new_thingfield.helpers({
 
 Template.new_thingfield.events({
     'submit form': function(e, tmpl) {
-	e.preventDefault();
-	var label = tmpl.find('#label').value;
-	if (label.length > 0) {
-	    var dtype = tmpl.find('#data_type').value;
+        e.preventDefault();
+        var label = tmpl.find('#label').value;
+        if (label.length > 0) {
+            var dtype = tmpl.find('#data_type').value;
             var field = {
                 label: label,
                 dtype: dtype
             };
             Meteor.call('newThingfield', field);
-	    tmpl.find('#label').value = '';
+            tmpl.find('#label').value = '';
         }
     }
 });
 
 Template.list_thingfields.rendered = function() {
     $(this.find('ol')).sortable({
-	axis: 'y',
 	stop: function(e, ui) {
 	    var item = ui.item.get(0);
 	    var next = ui.item.next().get(0);
@@ -62,7 +80,7 @@ Template.list_thingfields.rendered = function() {
 
 Template.list_thingfields.helpers({
     thingfields: function() {
-	return Thingfields.find({}, { sort: { form_order: 1 }});
+        return Thingfields.find({}, { sort: { form_order: 1 }});
     }
 });
 

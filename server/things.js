@@ -19,4 +19,3 @@ Meteor.publish('thingfields', function() {
 			    }
 			   );
 });
-
