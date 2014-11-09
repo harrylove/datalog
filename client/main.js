@@ -16,7 +16,24 @@ Template.list_things_table.helpers({
 	return Things.find({}, { sort: { Date: -1 }});
     },
     thingValue: function() {
-	return Template.parentData(1)[Template.parentData().label];
+	var label = Template.parentData().label;
+	var dtype = Template.parentData().dtype;
+	var data = Template.parentData(1)[label];
+	var value;
+	switch(dtype) {
+	case 'Date':
+	    value = moment(data).format();
+	    break;
+	case 'Decimal':
+            value = parseFloat(data);
+            break;
+        case 'Number':
+            value = Math.round(parseFloat(data));
+            break;
+        default:
+	    value = data;
+	}
+	return value;
     }
 });
 
@@ -27,8 +44,13 @@ Template.new_thing.events({
 	_.each(tmpl.findAll('input[type!=submit]'), function(input) {
 	    thing[input.id] = input.value;
 	});
-        Meteor.call('newThing', thing);
-        tmpl.find('form').reset();
+        Meteor.call('newThing', thing, function(e) {
+	    if (!e) {
+		tmpl.find('form').reset();
+            } else {
+		console.error(e);
+	    }
+	});
     }
 });
 
