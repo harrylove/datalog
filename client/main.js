@@ -40,17 +40,17 @@ Template.list_things_table.helpers({
 Template.new_thing.events({
     'submit form': function(e, tmpl) {
         e.preventDefault();
-	var thing = {};
-	_.each(tmpl.findAll('input[type!=submit]'), function(input) {
-	    thing[input.id] = input.value;
-	});
+        var thing = {};
+        _.each(tmpl.findAll('input[type!=submit]'), function(input) {
+            thing[input.id] = input.value;
+        });
         Meteor.call('newThing', thing, function(e) {
-	    if (!e) {
-		tmpl.find('form').reset();
+            if (!e) {
+                tmpl.find('form').reset();
             } else {
-		console.error(e);
-	    }
-	});
+                console.error(e);
+            }
+        });
     }
 });
 
@@ -68,8 +68,54 @@ Template.new_thingfield.events({
                 label: label,
                 dtype: dtype
             };
-            Meteor.call('newThingfield', field);
-            tmpl.find('#label').value = '';
+            Meteor.call('newThingfield', field, function(e) {
+		if (!e) {
+		    tmpl.reset();
+		}
+	    });
+        }
+    }
+});
+
+var getEditThingfield = function() {
+    var id = Session.get('edit_thingfield');
+    return Thingfields.findOne(id);
+};
+
+var setEditThingfield = function(id) {
+    Session.set('edit_thingfield', id);
+};
+
+Template.edit_thingfield.helpers({
+    label: function() {
+	var thingfield = getEditThingfield();
+	return thingfield && thingfield.label;
+    },
+    validFieldTypes: validFieldTypes,
+    selected: function() {
+	var thingfield = getEditThingfield();
+	if (thingfield) {
+	    return thingfield.dtype == this.toString() ? 'selected' : '';
+	}
+    }
+});
+
+Template.edit_thingfield.events({
+    'submit form': function(e, tmpl) {
+        e.preventDefault();
+        var label = tmpl.find('#edit_label').value;
+        if (label.length > 0) {
+            var dtype = tmpl.find('#edit_data_type').value;
+            var field = {
+		_id: getEditThingfield()._id,
+                label: label,
+                dtype: dtype
+            };
+            Meteor.call('editThingfield', field, function(e) {
+		if (e) {
+		    console.error(e);
+		}
+	    });
         }
     }
 });
@@ -106,3 +152,9 @@ Template.list_thingfields.helpers({
     }
 });
 
+Template.list_thingfields.events({
+    'click li': function(e) {
+	e.preventDefault();
+	setEditThingfield(this._id);
+    }
+});
