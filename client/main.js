@@ -3,14 +3,27 @@ Meteor.subscribe('thingfields');
 
 
 /* THINGS */
+var list_thing_table_sort = {};
+
+var setThingListSort = function(field) {
+    var sort = list_thing_table_sort[field._id];
+    var newSort = (sort == 1) ? -1 : 1;
+    list_thing_table_sort[field._id] = newSort;
+    var sortValue = {};
+    sortValue[field.label] = newSort;
+    Session.set('activeThingListSort', sortValue);
+};
+
+var getThingListSort = function() {
+    return Session.get('activeThingListSort') || { Date: -1 };
+};
 
 Template.list_things_table.helpers({
     thingfields: function() {
         return Thingfields.find({}, { sort: { form_order: 1 }});
     },
     things: function() {
-	// set Session of table order for sorting purposes
-	return Things.find({}, { sort: { Date: -1 }});
+	return Things.find({}, { sort: getThingListSort() });
     },
     thingValue: function() {
 	var label = Template.parentData().label;
@@ -35,6 +48,10 @@ Template.list_things_table.helpers({
 });
 
 Template.list_things_table.events({
+    'click thead th': function(e) {
+	e.preventDefault();
+	setThingListSort(this);
+    },
     'click tbody tr': function(e) {
 	e.preventDefault();
 	setEditThing(this._id);
