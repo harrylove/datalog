@@ -1,11 +1,8 @@
 Meteor.subscribe('things');
 Meteor.subscribe('thingfields');
 
-Template.new_thing.helpers({
-    thingfields: function() {
-        return Thingfields.find({}, { sort: { form_order: 1 }});
-    }
-});
+
+/* THINGS */
 
 Template.list_things_table.helpers({
     thingfields: function() {
@@ -37,22 +34,68 @@ Template.list_things_table.helpers({
     }
 });
 
+Template.list_things_table.events({
+    'click tbody tr': function(e) {
+	e.preventDefault();
+	setEditThing(this._id);
+    }
+});
+
+Template.new_thing.helpers({
+    thingfields: function() {
+        return Thingfields.find({}, { sort: { form_order: 1 }});
+    }
+});
+
 Template.new_thing.events({
     'submit form': function(e, tmpl) {
         e.preventDefault();
         var thing = {};
         _.each(tmpl.findAll('input[type!=submit]'), function(input) {
-            thing[input.id] = input.value;
+	    var field = input.id.replace('new_', '');
+            thing[field] = input.value;
         });
         Meteor.call('newThing', thing, function(e) {
             if (!e) {
                 tmpl.find('form').reset();
-            } else {
-                console.error(e);
             }
         });
     }
 });
+
+var getEditThing = function() {
+    var id = Session.get('edit_thing');
+    return Things.findOne(id);
+};
+
+var setEditThing = function(id) {
+    Session.set('edit_thing', id);
+};
+
+Template.edit_thing.helpers({
+    thingfields: function() {
+        return Thingfields.find({}, { sort: { form_order: 1 }});
+    },
+    value: function() {
+	var thing = getEditThing();
+	return thing && thing[this.label];
+    }
+});
+
+Template.edit_thing.events({
+    'submit form': function(e, tmpl) {
+        e.preventDefault();
+        var thing = getEditThing();
+        _.each(tmpl.findAll('input[type!=submit]'), function(input) {
+	    var field = input.id.replace('edit_', '');
+            thing[field] = input.value;
+        });
+        Meteor.call('editThing', thing);
+    }
+});
+
+
+/* THINGFIELDS */
 
 Template.new_thingfield.helpers({
     validFieldTypes: validFieldTypes
@@ -70,7 +113,7 @@ Template.new_thingfield.events({
             };
             Meteor.call('newThingfield', field, function(e) {
 		if (!e) {
-		    tmpl.reset();
+		    tmpl.find('form').reset();
 		}
 	    });
         }
@@ -88,15 +131,15 @@ var setEditThingfield = function(id) {
 
 Template.edit_thingfield.helpers({
     label: function() {
-	var thingfield = getEditThingfield();
-	return thingfield && thingfield.label;
+        var thingfield = getEditThingfield();
+        return thingfield && thingfield.label;
     },
     validFieldTypes: validFieldTypes,
     selected: function() {
-	var thingfield = getEditThingfield();
-	if (thingfield) {
-	    return thingfield.dtype == this.toString() ? 'selected' : '';
-	}
+        var thingfield = getEditThingfield();
+        if (thingfield) {
+            return thingfield.dtype == this.toString() ? 'selected' : '';
+        }
     }
 });
 
@@ -107,15 +150,11 @@ Template.edit_thingfield.events({
         if (label.length > 0) {
             var dtype = tmpl.find('#edit_data_type').value;
             var field = {
-		_id: getEditThingfield()._id,
+                _id: getEditThingfield()._id,
                 label: label,
                 dtype: dtype
             };
-            Meteor.call('editThingfield', field, function(e) {
-		if (e) {
-		    console.error(e);
-		}
-	    });
+            Meteor.call('editThingfield', field);
         }
     }
 });
@@ -154,7 +193,7 @@ Template.list_thingfields.helpers({
 
 Template.list_thingfields.events({
     'click li': function(e) {
-	e.preventDefault();
-	setEditThingfield(this._id);
+        e.preventDefault();
+        setEditThingfield(this._id);
     }
 });

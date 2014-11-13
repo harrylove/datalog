@@ -50,23 +50,52 @@ Thingfields.deny({
 
 validFieldTypes = [
     'String',
-    'Number'
-];
+    'Number',
+    'Date'
+].sort();
 
 Meteor.methods({
     newThing: function(thing) {
 	var fields = Thingfields.find().fetch();
-	_.each(fields, function(field) {
-	    switch(field.dtype) {
-	    case 'Number':
-		return check(thing[field.label], Number);
-        	break;
+        _.each(fields, function(field) {
+	    var value = thing[field.label];
+            switch(field.dtype) {
+            case 'Number':
+                check(parseFloat(value), Number);
+                break;
+	    case 'Date':
+		check(value, Match.Where(function(v) {
+                    return moment(v, 'YYYY-MM-DD').isValid();
+                }));
+		break;
 	    default:
-		return check(thing[field.label], String);
+                check(value, String);
             }
+        });
+        thing.user_id = Meteor.userId();
+        Things.insert(thing);
+    },
+    editThing: function(thing) {
+	var fields = Thingfields.find().fetch();
+        _.each(fields, function(field) {
+	    var value = thing[field.label];
+            switch(field.dtype) {
+            case 'Number':
+                check(parseFloat(value), Number);
+                break;
+	    case 'Date':
+                check(value, Match.Where(function(v) {
+                    return moment(v, 'YYYY-MM-DD').isValid();
+                }));
+		break;
+            default:
+                check(value, String);
+            }
+        });
+        thing.user_id = Meteor.userId();
+        Things.update(thing._id, {
+	    $set: _.omit(thing, '_id')
 	});
-	thing.user_id = Meteor.userId();
-	Things.insert(thing);
     },
     newThingfield: function(tf) {
         check(tf.label, String);
@@ -83,15 +112,15 @@ Meteor.methods({
 	Thingfields.update(id, { $set: { form_order: index }});
     },
     editThingfield: function(tf) {
-	check(tf.label, String);
+        check(tf.label, String);
         check(tf.dtype, Match.Where(function(x) {
             return _.contains(validFieldTypes, x);
         }));
         Thingfields.update(tf._id, {
-	    $set: {
-		label: tf.label,
-		dtype: tf.dtype
-	    }
-	});
+            $set: {
+                label: tf.label,
+                dtype: tf.dtype
+            }
+        });
     }
 });

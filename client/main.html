@@ -16,8 +16,11 @@
     </div>
   </div>
   <div class="row">
-    <div class="col-md-12">
+    <div class="col-md-6">
       {{> new_thing }}
+    </div>
+    <div class="col-md-6">
+      {{> edit_thing }}
     </div>
   </div>
   <div class="row">
@@ -36,8 +39,23 @@
   <form rel="form" class="form">
     {{#each thingfields }}
     <div class="form-group">
-      <label for="{{ label }}">{{ label }}</label>
-      <input id="{{ label }}" type="text" class="form-control">
+      <label for="new_{{ label }}">{{ label }}</label>
+      <input id="new_{{ label }}" type="text" class="form-control">
+    </div>
+    {{/each}}
+    <div class="form-group">
+      <input type="submit" class="btn" value="Save">
+    </div>
+  </form>
+</template>
+
+<template name="edit_thing">
+  <h1>Edit Thing</h1>
+  <form rel="form" class="form">
+    {{#each thingfields }}
+    <div class="form-group">
+      <label for="edit_{{ label }}">{{ label }}</label>
+      <input id="edit_{{ label }}" type="text" class="form-control" value="{{ value }}">
     </div>
     {{/each}}
     <div class="form-group">
