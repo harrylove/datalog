@@ -92,7 +92,6 @@ Meteor.methods({
                 check(value, String);
             }
         });
-        thing.user_id = Meteor.userId();
         Things.update(thing._id, {
 	    $set: _.omit(thing, '_id')
 	});

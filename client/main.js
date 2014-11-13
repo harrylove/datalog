@@ -32,7 +32,7 @@ Template.list_things_table.helpers({
 	var value;
 	switch(dtype) {
 	case 'Date':
-	    value = moment(data).format();
+	    value = moment(data).format('YYYY-MM-DD');
 	    break;
 	case 'Decimal':
             value = parseFloat(data);
@@ -61,6 +61,17 @@ Template.list_things_table.events({
 Template.new_thing.helpers({
     thingfields: function() {
         return Thingfields.find({}, { sort: { form_order: 1 }});
+    },
+    new_thing_template: function() {
+        var template;
+        switch(this.dtype) {
+        case 'Date':
+            template = 'new_thing_datepicker';
+            break;
+        default:
+            template = 'new_thing_text';
+        }
+        return template;
     }
 });
 
@@ -80,6 +91,10 @@ Template.new_thing.events({
     }
 });
 
+Template.new_thing_datepicker.rendered = function() {
+    $(this.find('.date')).datetimepicker();
+};
+
 var getEditThing = function() {
     var id = Session.get('edit_thing');
     return Things.findOne(id);
@@ -93,9 +108,16 @@ Template.edit_thing.helpers({
     thingfields: function() {
         return Thingfields.find({}, { sort: { form_order: 1 }});
     },
-    value: function() {
-	var thing = getEditThing();
-	return thing && thing[this.label];
+    edit_thing_template: function() {
+        var template;
+        switch(this.dtype) {
+        case 'Date':
+            template = 'edit_thing_datepicker';
+            break;
+        default:
+            template = 'edit_thing_text';
+        }
+        return template;
     }
 });
 
@@ -107,7 +129,29 @@ Template.edit_thing.events({
 	    var field = input.id.replace('edit_', '');
             thing[field] = input.value;
         });
-        Meteor.call('editThing', thing);
+        Meteor.call('editThing', thing, function(e) {
+	    if (!e) {
+                tmpl.find('form').reset();
+            }
+	});
+    }
+});
+
+Template.edit_thing_text.helpers({
+    value: function() {
+        var thing = getEditThing();
+        return thing && thing[this.label];
+    }
+});
+
+Template.edit_thing_datepicker.rendered = function() {
+    $(this.find('.date')).datetimepicker();
+};
+
+Template.edit_thing_datepicker.helpers({
+    value: function() {
+        var thing = getEditThing();
+        return thing && thing[this.label];
     }
 });
 
@@ -130,8 +174,8 @@ Template.new_thingfield.events({
             };
             Meteor.call('newThingfield', field, function(e) {
 		if (!e) {
-		    tmpl.find('form').reset();
-		}
+                    tmpl.find('form').reset();
+                }
 	    });
         }
     }

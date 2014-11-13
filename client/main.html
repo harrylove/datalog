@@ -39,8 +39,7 @@
   <form rel="form" class="form">
     {{#each thingfields }}
     <div class="form-group">
-      <label for="new_{{ label }}">{{ label }}</label>
-      <input id="new_{{ label }}" type="text" class="form-control">
+      {{> Template.dynamic template=new_thing_template }}
     </div>
     {{/each}}
     <div class="form-group">
@@ -49,19 +48,44 @@
   </form>
 </template>
 
+<template name="new_thing_text">
+  <label for="new_{{ label }}">{{ label }}</label>
+  <input id="new_{{ label }}" type="text" class="form-control">
+</template>
+
+<template name="new_thing_datepicker">
+  <label for="new_{{ label }}">{{ label }}</label>
+  <div class="input-group date" id="new_thing_datepicker">
+    <input id="new_{{ label }}" type="text" class="form-control" data-date-format="YYYY-MM-DD">
+    <span class="input-group-addon"><span class="glyphicon glyphicon-calendar"></span></span>
+  </div>
+</template>
+
 <template name="edit_thing">
   <h1>Edit Thing</h1>
   <form rel="form" class="form">
     {{#each thingfields }}
     <div class="form-group">
-      <label for="edit_{{ label }}">{{ label }}</label>
-      <input id="edit_{{ label }}" type="text" class="form-control" value="{{ value }}">
+      {{> Template.dynamic template=edit_thing_template }}
     </div>
     {{/each}}
     <div class="form-group">
       <input type="submit" class="btn" value="Save">
     </div>
   </form>
+</template>
+
+<template name="edit_thing_text">
+  <label for="edit_{{ label }}">{{ label }}</label>
+  <input id="edit_{{ label }}" type="text" class="form-control" value="{{ value }}">
+</template>
+
+<template name="edit_thing_datepicker">
+  <label for="edit_{{ label }}">{{ label }}</label>
+  <div class="input-group date" id="edit_datepicker">
+    <input id="edit_{{ label }}" type="text" class="form-control" data-date-format="YYYY-MM-DD" value="{{ value }}">
+    <span class="input-group-addon"><span class="glyphicon glyphicon-calendar"></span></span>
+  </div>
 </template>
 
 <template name="list_things_table">
