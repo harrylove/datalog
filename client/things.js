@@ -1,5 +1,3 @@
-Meteor.subscribe('things');
-
 var list_thing_table_sort = {};
 
 var setThingListSort = function(field) {
@@ -15,9 +13,16 @@ var getThingListSort = function() {
     return Session.get('activeThingListSort') || { Date: -1 };
 };
 
+Tracker.autorun(function() {
+    Meteor.subscribe('things', {
+        sort: getThingListSort(),
+        limit: 10
+    });
+});
+
 Template.list_things_table.helpers({
     thingfields: function() {
-        return Thingfields.find({}, { sort: { form_order: 1 }});
+	return Thingfields.find({}, { sort: { form_order: 1 }});
     },
     things: function() {
         return Things.find({}, { sort: getThingListSort() });
@@ -57,7 +62,7 @@ Template.list_things_table.events({
 
 Template.new_thing.helpers({
     thingfields: function() {
-        return Thingfields.find({}, { sort: { form_order: 1 }});
+	return Thingfields.find({}, { sort: { form_order: 1 }});
     },
     new_thing_template: function() {
         var template;
@@ -103,7 +108,7 @@ var setEditThing = function(id) {
 
 Template.edit_thing.helpers({
     thingfields: function() {
-        return Thingfields.find({}, { sort: { form_order: 1 }});
+	return Thingfields.find({}, { sort: { form_order: 1 }});
     },
     edit_thing_template: function() {
         var template;

@@ -90,7 +90,7 @@ Template.list_thingfields.rendered = function() {
 
 Template.list_thingfields.helpers({
     thingfields: function() {
-        return Thingfields.find({}, { sort: { form_order: 1 }});
+        return Thingfields.find();
     }
 });
 
