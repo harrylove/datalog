@@ -72,4 +72,9 @@
       {{/each}}
     </tbody>
   </table>
+  <ul class="pagination">
+    {{#each pages }}
+    <li class="{{ active }}"><a href="#">{{ this }}</a></li>
+    {{/each }}
+  </ul>
 </template>

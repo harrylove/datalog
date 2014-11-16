@@ -1,11 +1,13 @@
 Meteor.publish('things', function(options) {
-    var sort = options.sort || { Date: -1 };
-    var limit = options.limit || 10;
     if (this.userId) {
-	return Things.find({ user_id: this.userId },
+	var sort = options.sort || { Date: -1 };
+        var limit = options.limit || 10;
+        var skip = options.skip || 0;
+        return Things.find({ user_id: this.userId },
                            {
                                sort: sort,
 			       limit: limit,
+			       skip: skip,
                                fields: {
                                    user_id: 0
                                }
@@ -13,6 +15,16 @@ Meteor.publish('things', function(options) {
                           );
     }
     
+});
+
+Meteor.methods({
+    getThingsCount: function() {
+	var count = 0;
+	if (this.userId) {
+	    count = Things.find({ user_id: this.userId }).count();
+	}
+	return count;
+    }
 });
 
 Meteor.startup(function() {

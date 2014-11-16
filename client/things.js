@@ -1,3 +1,7 @@
+Meteor.startup(function() {
+    Session.set('thingsPerPage', 10);
+});
+
 var list_thing_table_sort = {};
 
 var setThingListSort = function(field) {
@@ -16,7 +20,14 @@ var getThingListSort = function() {
 Tracker.autorun(function() {
     Meteor.subscribe('things', {
         sort: getThingListSort(),
-        limit: 10
+        limit: Session.get('thingsPerPage'),
+	skip: Session.get('list_things_pagination')
+    });
+    
+    Meteor.call('getThingsCount', function(err, res) {
+	if (!err) {
+	    Session.set('thingsCount', res);
+	}
     });
 });
 
@@ -25,7 +36,17 @@ Template.list_things_table.helpers({
 	return Thingfields.find({}, { sort: { form_order: 1 }});
     },
     things: function() {
-        return Things.find({}, { sort: getThingListSort() });
+	var perPage = Session.get('thingsPerPage');
+	var theThings = Things.find({}, { sort: getThingListSort() }).fetch();
+	var emptyThing = {};
+	_.each(Thingfields.find().fetch(), function(field) {
+	    emptyThing[field] = null;
+	});
+	var thingsArray = [];
+	for (var i = 0; i < perPage; i++) {
+	    thingsArray[i] = theThings[i] || emptyThing;
+	}
+	return thingsArray;
     },
     thingValue: function() {
         var label = Template.parentData().label;
@@ -34,18 +55,40 @@ Template.list_things_table.helpers({
         var value;
         switch(dtype) {
         case 'Date':
-            value = moment(data).format('YYYY-MM-DD');
+            value = data ? moment(data).format('YYYY-MM-DD') : data;
             break;
         case 'Decimal':
-            value = parseFloat(data);
+            value = data ? parseFloat(data) : data;
             break;
         case 'Number':
-            value = Math.round(parseFloat(data));
+            value = data ? Math.round(parseFloat(data)) : data;
             break;
         default:
             value = data;
         }
         return value;
+    },
+    pages: function() {
+	var thingsCount = Session.get('thingsCount');
+	var pages = 1;
+	if (thingsCount >= 0) {
+	    var itemCount = Session.get('thingsPerPage');
+            pages = Math.ceil(thingsCount / itemCount) + 1;
+	}
+	return _.range(1, pages);
+    },
+    active: function() {
+	var page = Session.get('list_things_pagination');
+	var active = '';
+	if (page >= 0) {
+	    if (page == 0) {
+		page = 1;
+	    } else {
+		page = page / Session.get('thingsPerPage') + 1;
+            }
+	    active = (page == this.toString()) ? 'active' : '';
+	}
+	return active;
     }
 });
 
@@ -57,6 +100,10 @@ Template.list_things_table.events({
     'click tbody tr': function(e) {
         e.preventDefault();
         setEditThing(this._id);
+    },
+    'click .pagination a': function(e) {
+	var skip = (e.target.innerText - 1) * Session.get('thingsPerPage');
+	Session.set('list_things_pagination', skip);
     }
 });
 
@@ -85,7 +132,7 @@ Template.new_thing.events({
             var field = input.id.replace('new_', '');
             thing[field] = input.value;
         });
-        Meteor.call('newThing', thing, function(e) {
+        Meteor.call('newThing', thing, function(e, count) {
             if (!e) {
                 tmpl.find('form').reset();
             }
