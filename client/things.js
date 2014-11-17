@@ -1,5 +1,6 @@
 Meteor.startup(function() {
     Session.set('thingsPerPage', 10);
+    setThingSkip(1);
 });
 
 var list_thing_table_sort = {};
