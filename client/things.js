@@ -17,6 +17,11 @@ var getThingListSort = function() {
     return Session.get('activeThingListSort') || { Date: -1 };
 };
 
+var setThingSkip = function(page) {
+    var skip = (page - 1) * Session.get('thingsPerPage');
+    Session.set('list_things_pagination', skip);
+};
+
 Tracker.autorun(function() {
     Meteor.subscribe('things', {
         sort: getThingListSort(),
@@ -101,8 +106,8 @@ Template.list_things_table.events({
         setEditThing(this._id);
     },
     'click .pagination a': function(e) {
-	var skip = (e.target.innerText - 1) * Session.get('thingsPerPage');
-	Session.set('list_things_pagination', skip);
+	e.preventDefault();
+	setThingSkip(e.target.innerText);
     }
 });
 
