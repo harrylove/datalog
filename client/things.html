@@ -65,11 +65,17 @@
     <tbody>
       {{#each things }}
       <tr>
-        {{#each thingfields }}
+	{{#if thingHasData }}
+	{{#each thingfields }}
         <td>{{ thingValue }}</td>
-        {{/each}}
+	{{/each }}
+        {{else }}
+	{{#each thingfields }}
+        <td>&nbsp;</td>
+	{{/each }}
+	{{/if }}
       </tr>
-      {{/each}}
+      {{/each }}
     </tbody>
   </table>
   <ul class="pagination">

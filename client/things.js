@@ -37,31 +37,30 @@ Template.list_things_table.helpers({
     },
     things: function() {
 	var perPage = Session.get('thingsPerPage');
-	var theThings = Things.find({}, { sort: getThingListSort() }).fetch();
-	var emptyThing = {};
-	_.each(Thingfields.find().fetch(), function(field) {
-	    emptyThing[field] = null;
-	});
+  	var theThings = Things.find({}, { sort: getThingListSort() }).fetch();
 	var thingsArray = [];
 	for (var i = 0; i < perPage; i++) {
-	    thingsArray[i] = theThings[i] || emptyThing;
+	    thingsArray[i] = theThings[i] || null;
 	}
 	return thingsArray;
+    },
+    thingHasData: function() {
+	return !_.isEmpty(this);
     },
     thingValue: function() {
         var label = Template.parentData().label;
         var dtype = Template.parentData().dtype;
         var data = Template.parentData(1)[label];
-        var value;
+	var value;
         switch(dtype) {
         case 'Date':
-            value = data ? moment(data).format('YYYY-MM-DD') : data;
+            value = moment(data).format('YYYY-MM-DD');
             break;
         case 'Decimal':
-            value = data ? parseFloat(data) : data;
+            value = parseFloat(data);
             break;
         case 'Number':
-            value = data ? Math.round(parseFloat(data)) : data;
+            value = Math.round(parseFloat(data));
             break;
         default:
             value = data;
