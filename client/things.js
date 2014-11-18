@@ -102,6 +102,12 @@ Template.list_things_table.events({
         e.preventDefault();
         setThingListSort(this);
     },
+    'mouseenter thead th': function(e, tmpl) {
+	$(e.target).addClass('hover');
+    },
+    'mouseleave thead th': function(e, tmpl) {
+        $(e.target).removeClass('hover');
+    },
     'click tbody tr': function(e) {
         e.preventDefault();
         setEditThing(this._id);
