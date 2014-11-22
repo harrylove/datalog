@@ -7,13 +7,40 @@ Tracker.autorun(function(comp) {
     }
 });
 
+var setThingsCount = function(count) {
+    Session.set('thingsCount', count);
+};
+
+var getThingsCount = function() {
+    return Session.get('thingsCount');
+};
+
+
 
 // Table Skip (pagination)
+var getTotalPages = function() {
+    var count = getThingsCount();
+    var pages = 1;
+    if (count > 0) {
+	pages = Math.ceil(count / getPerPage());
+    }
+    return pages;
+};
+
+var isCurrentPageValid = function(page) {
+    console.info(skip / getPerPage(), getTotalPages());
+};
+
+var getCurrentPage = function() {
+    return Math.floor(getThingListSkip() / getPerPage()) + 1;
+};
+
 var initThingListSkip = function() {
     var user = getUser();
     var skip;
     if (user.profile && user.profile.thing_skip) {
         skip = user.profile.thing_skip;
+	console.info(getCurrentPage());
     } else {
         skip = calculateThingListSkip(1);
     }
@@ -111,7 +138,7 @@ Tracker.autorun(function() {
     
     Meteor.call('getThingsCount', function(err, res) {
 	if (!err) {
-	    Session.set('thingsCount', res);
+	    setThingsCount(res);
 	}
     });
 });
@@ -153,24 +180,12 @@ Template.list_things_table.helpers({
         return value;
     },
     pages: function() {
-	var thingsCount = Session.get('thingsCount');
-	var pages = 1;
-	if (thingsCount >= 0) {
-	    var itemCount = getPerPage();
-            pages = Math.ceil(thingsCount / itemCount) + 1;
-	}
-	return _.range(1, pages);
+	return _.range(1, getTotalPages() + 1);
     },
     active: function() {
-	var page = getThingListSkip();
 	var active = '';
-	if (page >= 0) {
-	    if (page == 0) {
-		page = 1;
-	    } else {
-		page = Math.floor(page / getPerPage()) + 1;
-            }
-	    active = (page == this.toString()) ? 'active' : '';
+	if (getCurrentPage() == this.toString()) {
+	    active = 'active';
 	}
 	return active;
     }
