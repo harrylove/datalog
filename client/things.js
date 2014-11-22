@@ -1,9 +1,9 @@
 Tracker.autorun(function(comp) {
     if (Meteor.user()) {
-	initPerPage();
+        initPerPage();
         initThingListSort();
         initThingListSkip()
-	comp.stop();
+        comp.stop();
     }
 });
 
@@ -99,9 +99,11 @@ var list_thing_table_sort = {};
 
 var initThingListSort = function() {
     var user = getUser();
-    var sort = { Date: -1 };
+    var sort = {};
     if (user.profile && user.profile.thing_sort) {
         sort = user.profile.thing_sort;
+    } else {
+	sort[Thingfields.findOne().label] = -1;
     }
     setThingListSort(sort);
 };
@@ -151,7 +153,7 @@ Template.list_things_table.helpers({
     },
     things: function() {
 	var perPage = getPerPage();
-  	var theThings = Things.find({}, { sort: getThingListSort() }).fetch();
+	var theThings = Things.find({}, { sort: getThingListSort() }).fetch();
 	var thingsArray = [];
 	for (var i = 0; i < perPage; i++) {
 	    thingsArray[i] = theThings[i] || null;
