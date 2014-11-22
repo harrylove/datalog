@@ -1,33 +1,112 @@
-Meteor.startup(function() {
-    Session.set('thingsPerPage', 10);
-    setThingSkip(1);
+Tracker.autorun(function(comp) {
+    if (Meteor.user()) {
+	initPerPage();
+        initThingListSort();
+        initThingListSkip()
+	comp.stop();
+    }
 });
 
+
+// Table Skip (pagination)
+var initThingListSkip = function() {
+    var user = getUser();
+    var skip;
+    if (user.profile && user.profile.thing_skip) {
+        skip = user.profile.thing_skip;
+    } else {
+        skip = calculateThingListSkip(1);
+    }
+    setThingListSkip(skip);
+};
+
+var calculateThingListSkip = function(page) {
+    return (page - 1) * getPerPage();
+};
+
+var setUserThingListSkip = function(skip) {
+    skip = calculateThingListSkip(skip);
+    setThingListSkip(skip);
+    Meteor.call('setUserThingSkip', skip);
+};
+
+var setThingListSkip = function(skip) {
+    Session.set('list_things_pagination', skip);
+};
+
+var getThingListSkip = function() {
+    return Session.get('list_things_pagination');
+};
+
+
+
+// Table Items Per Page (pagination)
+var initPerPage = function() {
+    var user = getUser();
+    var perPage = 10;
+    if (user.profile && user.profile.per_page) {
+        perPage = user.profile.per_page;
+    }
+    setPerPage(perPage);
+};
+
+var setUserPerPage = function(perPage) {
+    setPerPage(perPage);
+    Meteor.call('setUserThingPerPage', perPage);
+};
+
+var setPerPage = function(perPage) {
+    Session.set('thingsPerPage', perPage);
+};
+
+var getPerPage = function() {
+    return Session.get('thingsPerPage');
+};
+
+
+
+// Table Sorting
 var list_thing_table_sort = {};
 
-var setThingListSort = function(field) {
+var initThingListSort = function() {
+    var user = getUser();
+    var sort = { Date: -1 };
+    if (user.profile && user.profile.thing_sort) {
+        sort = user.profile.thing_sort;
+    }
+    setThingListSort(sort);
+};
+
+var setUserThingListSort = function(sort) {
+    setThingListSort(sort);
+    Meteor.call('setUserThingSort', sort);
+};
+
+var setThingListSort = function(sort) {
+    Session.set('activeThingListSort', sort);
+};
+
+var calculateThingListSort = function(field) {
     var sort = list_thing_table_sort[field._id];
     var newSort = (sort == 1) ? -1 : 1;
     list_thing_table_sort[field._id] = newSort;
     var sortValue = {};
     sortValue[field.label] = newSort;
-    Session.set('activeThingListSort', sortValue);
+    return sortValue;
 };
 
 var getThingListSort = function() {
-    return Session.get('activeThingListSort') || { Date: -1 };
+    return Session.get('activeThingListSort');
 };
 
-var setThingSkip = function(page) {
-    var skip = (page - 1) * Session.get('thingsPerPage');
-    Session.set('list_things_pagination', skip);
-};
+
+
 
 Tracker.autorun(function() {
     Meteor.subscribe('things', {
         sort: getThingListSort(),
-        limit: Session.get('thingsPerPage'),
-	skip: Session.get('list_things_pagination')
+        limit: getPerPage(),
+	skip: getThingListSkip()
     });
     
     Meteor.call('getThingsCount', function(err, res) {
@@ -42,7 +121,7 @@ Template.list_things_table.helpers({
 	return Thingfields.find({}, { sort: { form_order: 1 }});
     },
     things: function() {
-	var perPage = Session.get('thingsPerPage');
+	var perPage = getPerPage();
   	var theThings = Things.find({}, { sort: getThingListSort() }).fetch();
 	var thingsArray = [];
 	for (var i = 0; i < perPage; i++) {
@@ -77,19 +156,19 @@ Template.list_things_table.helpers({
 	var thingsCount = Session.get('thingsCount');
 	var pages = 1;
 	if (thingsCount >= 0) {
-	    var itemCount = Session.get('thingsPerPage');
+	    var itemCount = getPerPage();
             pages = Math.ceil(thingsCount / itemCount) + 1;
 	}
 	return _.range(1, pages);
     },
     active: function() {
-	var page = Session.get('list_things_pagination');
+	var page = getThingListSkip();
 	var active = '';
 	if (page >= 0) {
 	    if (page == 0) {
 		page = 1;
 	    } else {
-		page = page / Session.get('thingsPerPage') + 1;
+		page = Math.floor(page / getPerPage()) + 1;
             }
 	    active = (page == this.toString()) ? 'active' : '';
 	}
@@ -100,7 +179,7 @@ Template.list_things_table.helpers({
 Template.list_things_table.events({
     'click thead th': function(e) {
         e.preventDefault();
-        setThingListSort(this);
+        setUserThingListSort(calculateThingListSort(this));
     },
     'mouseenter thead th': function(e, tmpl) {
 	$(e.target).addClass('hover');
@@ -114,7 +193,7 @@ Template.list_things_table.events({
     },
     'click .pagination a': function(e) {
 	e.preventDefault();
-	setThingSkip(e.target.innerText);
+	setUserThingListSkip(e.target.innerText);
     }
 });
 
