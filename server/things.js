@@ -17,6 +17,29 @@ Meteor.publish('things', function(options) {
     
 });
 
+Things.allow({
+    insert: function (user_id, doc) {
+        return (user_id && doc.user_id === user_id);
+    },
+    update: function (user_id, doc, fields, modifier) {
+        return doc.user_id === user_id;
+    },
+    remove: function (user_id, doc) {
+        return doc.user_id === user_id;
+    },
+    fetch: ['user_id']
+});
+
+Things.deny({
+    update: function (user_id, docs, fields, modifier) {
+        return _.contains(fields, 'user_id');
+    },
+    remove: function (user_id, doc) {
+        return doc.deleted;
+    },
+    fetch: ['deleted']
+});
+
 Meteor.methods({
     getThingsCount: function() {
 	var count = 0;

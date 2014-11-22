@@ -12,6 +12,29 @@ Meteor.publish('thingfields', function() {
     
 });
 
+Thingfields.allow({
+    insert: function (user_id, doc) {
+        return (user_id && doc.user_id === user_id);
+    },
+    update: function (user_id, doc, fields, modifier) {
+        return doc.user_id === user_id;
+    },
+    remove: function (user_id, doc) {
+        return doc.user_id === user_id;
+    },
+    fetch: ['user_id']
+});
+
+Thingfields.deny({
+    update: function (user_id, docs, fields, modifier) {
+        return _.contains(fields, 'user_id');
+    },
+    remove: function (user_id, doc) {
+        return doc.deleted;
+    },
+    fetch: ['deleted']
+});
+
 Meteor.startup(function() {
     var user = Meteor.users.findOne();
     if (!_.isUndefined(user) && !_.isNull(user._id) && 0 == Thingfields.find().count()) {
