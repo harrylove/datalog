@@ -1,15 +1,15 @@
 Meteor.methods({
     setUserThingPerPage: function(perPage) {
+	check(perPage, Number);
 	updateUserProfileField('per_page', perPage);
-        return perPage;
     },
     setUserThingSort: function(sort) {
+	check(sort, Object);
 	updateUserProfileField('thing_sort', sort);
-        return sort;
     },
     setUserThingSkip: function(skip) {
+	check(skip, Number);
 	updateUserProfileField('thing_skip', skip);
-        return skip;
     }
 });
 
