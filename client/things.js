@@ -28,21 +28,23 @@ var getTotalPages = function() {
 };
 
 var isCurrentPageValid = function(page) {
-    console.info(skip / getPerPage(), getTotalPages());
+    var currentPage = page || getCurrentPage();
+    return currentPage <= getTotalPages();
 };
 
-var getCurrentPage = function() {
-    return Math.floor(getThingListSkip() / getPerPage()) + 1;
+var getCurrentPage = function(skip) {
+    var skipping = skip || getThingListSkip();
+    return Math.floor(skipping / getPerPage()) + 1;
 };
 
 var initThingListSkip = function() {
     var user = getUser();
-    var skip;
+    var skip = calculateThingListSkip(1);
     if (user.profile && user.profile.thing_skip) {
-        skip = user.profile.thing_skip;
-	console.info(getCurrentPage());
-    } else {
-        skip = calculateThingListSkip(1);
+	var userSkip = user.profile.thing_skip;
+	if (isCurrentPageValid(getCurrentPage(userSkip))) {
+            skip = userSkip;
+        }
     }
     setThingListSkip(skip);
 };
