@@ -65,22 +65,11 @@
     <tbody>
       {{#each things }}
       <tr>
-	{{#if thingHasData }}
 	{{#each thingfields }}
         <td>{{ thingValue }}</td>
 	{{/each }}
-        {{else }}
-	{{#each thingfields }}
-        <td>&nbsp;</td>
-	{{/each }}
-	{{/if }}
       </tr>
       {{/each }}
     </tbody>
   </table>
-  <ul class="pagination">
-    {{#each pages }}
-    <li class="{{ active }}"><a href="#">{{ this }}</a></li>
-    {{/each }}
-  </ul>
 </template>

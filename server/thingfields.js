@@ -1,15 +1,15 @@
 Meteor.publish('thingfields', function() {
     if (this.userId) {
-        return Thingfields.find({ user_id: this.userId },
-                                {
-                                    sort: { form_order: 1 },
-                                    fields: {
-                                        user_id: 0
-                                    }
-                                }
-                               );
+        return Thingfields.find(
+	    { user_id: this.userId },
+            {
+                sort: { form_order: 1 },
+                fields: {
+                    user_id: 0
+                }
+            }
+        );
     }
-    
 });
 
 Thingfields.allow({
@@ -38,8 +38,6 @@ Thingfields.deny({
 Meteor.startup(function() {
     var user = Meteor.users.findOne();
     if (!_.isUndefined(user) && !_.isNull(user._id) && 0 == Thingfields.find().count()) {
-	console.log(user);
-	console.log(user._id);
         _.each([
             {
                 user_id: user._id,
