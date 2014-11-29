@@ -45,7 +45,7 @@ Template.list_things_table.helpers({
 	var value;
         switch(dtype) {
         case 'Date':
-            value = moment.unix(data).format('YYYY-MM-DD');
+            value = moment(data).format('YYYY-MM-DD');
             break;
         case 'Decimal':
             value = parseFloat(data);

@@ -43,37 +43,37 @@ Meteor.startup(function() {
         _.each([
             {
                 user_id: user._id,
-		Date: moment('2014-05-06').unix(),
+		Date: moment('2014-05-06').toDate(),
                 Duration: parseFloat(1)
             },
             {
                 user_id: user._id,
-                Date: moment('2014-02-06').unix(),
+                Date: moment('2014-02-06').toDate(),
                 Duration: parseFloat(2)
             },
             {
                 user_id: user._id,
-                Date: moment('2014-06-06').unix(),
+                Date: moment('2014-06-06').toDate(),
                 Duration: parseFloat(4)
             },
             {
                 user_id: user._id,
-                Date: moment('2014-07-06').unix(),
+                Date: moment('2014-07-06').toDate(),
                 Duration: parseFloat(5)
             },
             {
                 user_id: user._id,
-                Date: moment('2014-08-06').unix(),
+                Date: moment('2014-08-06').toDate(),
                 Duration: parseFloat(10)
             },
             {
                 user_id: user._id,
-                Date: moment('2014-09-06').unix(),
+                Date: moment('2014-09-06').toDate(),
                 Duration: parseFloat(10)
             },
             {
                 user_id: user._id,
-                Date: moment('2014-11-06').unix(),
+                Date: moment('2014-11-06').toDate(),
                 Duration: parseFloat(7.4)
             }
         ], function(thing) {

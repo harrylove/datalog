@@ -15,7 +15,7 @@ var validateThing = function(thing) {
             check(value, Match.Where(function(v) {
                 return v.isValid();
             }));
-            thing[field.label] = value.format(x);
+            thing[field.label] = value.toDate();
             break;
         default:
             check(value, String);
